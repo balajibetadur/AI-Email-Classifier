@@ -20,6 +20,7 @@ import extract_msg
 import re
 import os
 import random
+import nltk
 nltk.download('stopwords')
 from nltk.corpus import stopwords 
 
@@ -37,7 +38,7 @@ def unzip(zip_path):
 
 
 # function to clean text includes stopwords removal, stemming, punctuation removal
-# input: raw test
+# input: raw text
 # output: cleaned text
 def text_to_wordlist(text, remove_stopwords=False, stem_words=False):
         # Clean the text, with the option to remove stopwords and to stem words.

@@ -113,11 +113,13 @@ dataframe = pd.read_excel('data_processed.xlsx')
 filenames.append("")
 
 # all punctuations to remove
-REPLACE_BY_SPACE_RE = re.compile('[/(){}\[\]\|@,;]')
+REPLACE_BY_SPACE_RE = re.compile("[/(){}\[\]\|@,;]")
 BAD_SYMBOLS_RE = re.compile('[^0-9a-z #+_]')
 STOPWORDS = set(stopwords.words('english'))
 
 # function to clean text
+# input: raw text
+# output: cleaned text
 def clean_text(text):
                 """
                     text: a string
@@ -156,8 +158,10 @@ def home():
     filenames.append('')
     filenames.append(' ')
 
-    return render_template('index.html',subject = subject, js=js,em=em,l=l,params = params,mo=mo, s = s, filenames = filenames,k=k,tabs=tabs)
+    return render_template('index.html',subject = subject, js=js,em=em,l=l,params = all_params,mo=mo, s = s, filenames = filenames,k=k,tabs=tabs)
 
+
+# prediction function: This function predicts the testing data
 @app.route('/preee',methods=["GET","POST"])
 def preee():
     if request.method=="POST":
@@ -185,35 +189,13 @@ def preee():
             pass
 
         if is_file:
-            # ppp = os.getcwd().replace('\\','/')
-            # for i in os.listdir(ppp + '/TESTS'):
-            #     if os.path.isdir(ppp + '/TESTS/' + i):
-            #         shutil.rmtree(ppp + '/TESTS/' + i) 
-            #     else:
-            #         os.remove(ppp + '/TESTS/' + i) 
 
             test_csv = preprocess.process_test('TESTS',pat.filename)
 
         model_path = os.getcwd().replace('\\','/') + '/Models/' + js + '.pkl'
-        
-        # vect = os.getcwd().replace('\\','/') + '/Models/' + js + '-cv.pkl'
-
-        # model_info = open(os.getcwd().replace('\\','/') + '/Models/' + js + '.json')
-
-        # model_data = json.load(model_info)
-
-        # classes = model_data['Classes']
-
-        # cv = CountVectorizer(decode_error="replace",vocabulary = pickle.load(open(vect, "rb")))
-
+     
         model = joblib.load(model_path)
 
-        # classes_ = os.list
-        # dir(os.getcwd().replace('\\','/') + '/Uploads')
-        # classes = []
-        # for i in classes_:
-        #     if not i.endswith('.zip'):
-        #         classes.append(i)
 
         if is_file:
             test_data = pd.read_excel(test_csv)
@@ -247,11 +229,13 @@ def preee():
             mo = mo.remove('')
         for i in range(0,len(mo)):
             mo[i] = mo[i][:-4]
-        return render_template('index.html',final_output = final_output, subject = subject,  results = results, k=k,l=l,params = params,mo=mo,s = s,em=em,js=js, filenames = filenames,tabs=tabs)
+        return render_template('index.html',final_output = final_output, subject = subject,  results = results, k=k,l=l,params = all_params,mo=mo,s = s,em=em,js=js, filenames = filenames,tabs=tabs)
 
     return redirect("/")
     # return render_template('index.html',l = 0,)
 
+
+# training function: This function trains model
 @app.route('/sub',methods=["GET","POST"])
 def sub():
     if request.method == "POST":
@@ -295,9 +279,9 @@ def sub():
             elif algorithm == 'Decesion Tree Classifier':
                 pass
 
-            # elif algorithm == 'Random Forest Classifier':
-            #     model = models.Random_Forest(params)
-            #     print('trained')
+            elif algorithm == 'Random Forest Classifier':
+                model = models.Random_Forest(params)
+                print('trained')
                 
 
             elif algorithm == 'Linear Support Vector Machine':
@@ -313,30 +297,8 @@ def sub():
 
             joblib.dump(model, os.getcwd().replace('\\','/') + f'/Models/{model_name}.pkl')
             print('model saved')
-            # paras = model.get_params()
-            # try:
-            #     # paras.pop('estimator')
-            #     paras.pop('steps')
-            #     paras.pop('model')
-            #     paras.pop('tfidf')
-            #     paras.pop('vect')
-            # except Exception as e:
-            #     print(e)
-                
 
-            # dictionary ={   
-            # # "Accuracy" : max(score_1, score_2),
-            # "Model" : model_name,
-            # "Classes" : df['Class'].unique().tolist(),
-            # "Parameters" : paras
-            # }   
-
-            # # pickle.dump(cv.vocabulary_,open( os.getcwd().replace('\\','/') + f"/Models/{model_name}-cv.pkl","wb"))  
-            
-            # with open( os.getcwd().replace('\\','/') + f"/Models/{model_name}.json", "w") as outfile:  
-            #     json.dump(dictionary, outfile) 
-            # print('json saved')
-            
+           
         elif t_time == '2': 
 
             if algorithm == 'Artificial Neural Networks':
@@ -354,6 +316,8 @@ def sub():
         # return 'hey'
     return redirect("/")
 
+
+# Download function: This function downloads results
 @app.route('/download',methods=["GET","POST"])
 def download():
     return send_file('Results.csv',

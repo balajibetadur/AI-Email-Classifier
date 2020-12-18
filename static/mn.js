@@ -1,4 +1,15 @@
+// mn.js :
 
+// Validates params and operates webpage dynamically
+
+// 1. unique name vaidation
+// 2. auto update algorithms based on time criteria
+// 3. change parametsrs dynamically based ion algoriythm selecetd by user
+// 4. returns dictionary to the flask app from index.html
+
+
+
+// validate model existance in select model dropdown
 if(document.getElementById("op").value==="OK")
 {
     document.getElementById("cv").style.display="block";
@@ -6,7 +17,11 @@ if(document.getElementById("op").value==="OK")
     document.getElementById("cv3").style.display="none";
     document.getElementById("cv1").style.display="block";
 }
-var d={
+
+
+// all parameters variable
+var d = {
+
     "time" : {
         "1": "short time",
         "2": "moderate time"
@@ -46,6 +61,9 @@ var d={
         }
     }
 }
+
+
+
 var z = document.getElementById("s").value;
 z = z.split("$");
 console.log(z);
@@ -64,7 +82,7 @@ function preee(){
     document.getElementById("title").focus();
     return false; 
 }
-  
+
 document.getElementById("err").style.display="none";
 return true; 
 }

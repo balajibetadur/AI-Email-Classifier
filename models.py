@@ -148,7 +148,7 @@ def Multinomnal_NB(parameters):
 
         return model
 
-def Ranfom_Forest(parameters):    
+def Random_Forest(parameters):    
         
 
         # model in a pipeline with count vectorizer and TfidfTransformer
