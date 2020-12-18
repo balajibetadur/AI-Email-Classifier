@@ -25,6 +25,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import SGDClassifier
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 from imblearn.over_sampling import RandomOverSampler, SMOTE
@@ -182,6 +183,45 @@ def Random_Forest(parameters):
                 'n_estimators': [100, 200, 300]       
             }
             model = GridSearchCV(model, params_)
+
+        return model
+
+def Decesion_Tree(parameters):    
+        
+
+        # model in a pipeline with count vectorizer and TfidfTransformer
+        # model = Pipeline([('vect', CountVectorizer()),
+        #        ('tfidf', TfidfTransformer()),
+        #        ('model', DecisionTreeClassifier()),
+        #       ])
+
+
+        # model in a pipeline with count vectorizer and TfidfTransformer along with randmoversampler
+        # Randomoversampler -> It balances the dataset by increasing the minority class samples randomly
+        model = imbPipeline([
+                ('vect', CountVectorizer()),
+               ('tfidf', TfidfTransformer()),
+               ('oversample', RandomOverSampler()),
+               ('clf', DecisionTreeClassifier()),
+              ])
+
+
+        # if gridsearch parameter is selected as yes then gridsearch cv code executes and tries
+        # all given values for all given parameters
+        # if parameters["Grid Search"] == "Yes":
+                
+        #     path = model.cost_complexity_pruning_path(features, y_train)
+        #     ccp_alphas, impurities = path.ccp_alphas, path.impurities
+        #     params_ = {
+        #         "criterion" : ["gini", "entropy"],
+        #         "splitter" : ["best", "random"],
+        #         "ccp_alpha" : ccp_alphas,
+        #         "min_samples_split" : [1,2,3,4],
+        #         "min_samples_leaf" : [1,2,3],
+        #         # "max_features" : [int, float, "sqrt", "log", None, "auto"],
+        #         "class_weight" : [None, "balanced"]
+        #     }
+        #     model = GridSearchCV(model, params_)
 
         return model
 

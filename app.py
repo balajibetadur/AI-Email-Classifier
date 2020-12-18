@@ -77,7 +77,7 @@ all_params = {
             "1" : ["Logistic Regression",["1","2","4"]],
             "2" : ["Decesion Tree Classifier", ["1","2","3"]],
             "3" : ["Random Forest Classifier",["1","2","3","5","6"]],   
-            "4" : ["Linear Support Vector Machine",["1","2","8","9","10","11"]],   
+            "4" : ["Support Vector Machine",["1","2","8","9","10","11"]],   
             "5" : ["Naive Bayes Classifier",["1","2","7"]]
         },
         
@@ -132,6 +132,98 @@ def clean_text(text):
                 text = BAD_SYMBOLS_RE.sub('', text) # delete symbols which are in BAD_SYMBOLS_RE from text
                 text = ' '.join(word for word in text.split() if word not in STOPWORDS) # delete stopwors from text
                 return text
+
+
+# training function: This function trains model
+@app.route('/sub',methods=["GET","POST"])
+def sub():
+    if request.method == "POST":
+        json_ = eval(request.form.get('rs'))
+        path = request.files.getlist('fi')
+        t_time = json_['t_ime']
+        data_files = []
+        for i in path:
+            data_files.append(i.filename)
+            i.save(os.path.join(app.config['UPLOAD_FOLDER'],secure_filename(i.filename)))
+
+        algorithm = all_params['models'][json_['t_ime']][json_['algo']][0]
+        print(json_)
+        print(algorithm)
+        params = json_.copy()
+
+
+        params['algo'] = algorithm
+        params['files'] = data_files
+
+        # split_ratio = round((params['Test Size'] / 100), 2)
+        model_name = params['title']
+
+        data_path = preprocess.process('Uploads', data_files)
+        df = pd.read_excel(data_path)
+
+        if t_time == '1':
+            
+            df['Mail'] = df['Mail'].apply(clean_text)
+
+            x_train = df.Mail
+            y_train = df.Class
+            # x_train, X_test, y_train, y_test = train_test_split(X, y, test_size = split_ratio, random_state = 42)
+
+            
+            if algorithm == 'Logistic Regression':
+                model = models.Logistic_Regression(params)
+                print('trained')
+
+
+            elif algorithm == 'Decesion Tree Classifier':
+                model = models.Decesion_Tree(params)
+                
+
+            elif algorithm == 'Random Forest Classifier':
+                model = models.Random_Forest(params)
+                print('trained')
+                
+
+            elif algorithm == 'Support Vector Machine':
+                model = models.SGD_Classifier(params)
+                print('trained')
+                
+
+            elif algorithm == 'Naive Bayes Classifier':
+                model = models.Multinomnal_NB(params)
+                print('trained')
+
+            model.fit(x_train, y_train)
+
+            joblib.dump(model, os.getcwd().replace('\\','/') + f'/Models/{model_name}.pkl')
+            print('model saved')
+
+           
+        elif t_time == '2': 
+
+            if algorithm == 'Artificial Neural Networks':
+                models.LogisticRegression(params)
+
+            elif algorithm == 'LSTM':
+                models.LogisticRegression(params)
+
+            elif algorithm == 'BERT':
+                models.LogisticRegression(params)
+
+                
+        
+        
+        # return 'hey'
+    return redirect("/")
+
+
+# Download function: This function downloads results
+@app.route('/download',methods=["GET","POST"])
+def download():
+    return send_file('Results.csv',
+                     mimetype='text/csv',
+                     attachment_filename='Results.csv',
+                     as_attachment=True)
 
 
 # home function : first page to load when the website is opened
@@ -233,98 +325,6 @@ def preee():
 
     return redirect("/")
     # return render_template('index.html',l = 0,)
-
-
-# training function: This function trains model
-@app.route('/sub',methods=["GET","POST"])
-def sub():
-    if request.method == "POST":
-        json_ = eval(request.form.get('rs'))
-        path = request.files.getlist('fi')
-        t_time = json_['t_ime']
-        data_files = []
-        for i in path:
-            data_files.append(i.filename)
-            i.save(os.path.join(app.config['UPLOAD_FOLDER'],secure_filename(i.filename)))
-
-        algorithm = all_params['models'][json_['t_ime']][json_['algo']][0]
-        print(json_)
-        print(algorithm)
-        params = json_.copy()
-
-
-        params['algo'] = algorithm
-        params['files'] = data_files
-
-        # split_ratio = round((params['Test Size'] / 100), 2)
-        model_name = params['title']
-
-        data_path = preprocess.process('Uploads', data_files)
-        df = pd.read_excel(data_path)
-
-        if t_time == '1':
-            
-            df['Mail'] = df['Mail'].apply(clean_text)
-
-            x_train = df.Mail
-            y_train = df.Class
-            # x_train, X_test, y_train, y_test = train_test_split(X, y, test_size = split_ratio, random_state = 42)
-
-            
-            if algorithm == 'Logistic Regression':
-                model = models.Logistic_Regression(params)
-                print('trained')
-
-
-            elif algorithm == 'Decesion Tree Classifier':
-                pass
-
-            elif algorithm == 'Random Forest Classifier':
-                model = models.Random_Forest(params)
-                print('trained')
-                
-
-            elif algorithm == 'Linear Support Vector Machine':
-                model = models.SGD_Classifier(params)
-                print('trained')
-                
-
-            elif algorithm == 'Naive Bayes Classifier':
-                model = models.Multinomnal_NB(params)
-                print('trained')
-
-            model.fit(x_train, y_train)
-
-            joblib.dump(model, os.getcwd().replace('\\','/') + f'/Models/{model_name}.pkl')
-            print('model saved')
-
-           
-        elif t_time == '2': 
-
-            if algorithm == 'Artificial Neural Networks':
-                models.LogisticRegression(params)
-
-            elif algorithm == 'LSTM':
-                models.LogisticRegression(params)
-
-            elif algorithm == 'BERT':
-                models.LogisticRegression(params)
-
-                
-        
-        
-        # return 'hey'
-    return redirect("/")
-
-
-# Download function: This function downloads results
-@app.route('/download',methods=["GET","POST"])
-def download():
-    return send_file('Results.csv',
-                     mimetype='text/csv',
-                     attachment_filename='Results.csv',
-                     as_attachment=True)
-
 
 
 

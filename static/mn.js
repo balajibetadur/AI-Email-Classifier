@@ -50,7 +50,7 @@ var d = {
             "2" : ["Decesion Tree Classifier", ["1","2","3"]],
             "3" : ["Random Forest Classifier",["1","2","3","5","6"]],   
             // # "4" : ["XGBoost",["1","2","3","4","6","7"]],   
-            "4" : ["Linear Support Vector Machine",["1","2","8","9","10","11"]],   
+            "4" : ["Support Vector Machine",["1","2","8","9","10","11"]],   
             "5" : ["Naive Bayes Classifier",["1","2","7"]]
         },
         
