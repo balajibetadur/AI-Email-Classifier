@@ -1,0 +1,15 @@
+Flask==1.1.1
+gunicorn==19.9.0
+itsdangerous==1.1.0
+Jinja2==2.10.1
+Markupsafe==1.1.1
+numpy>=1.9.2
+scipy>=0.15.1
+scikit-learn>=0.18
+pandas>=0.19
+imblearn>=0.0
+imbalanced-learn>=0.7.0
+nltk>=3.5
+beautifulsoup4>=4.8.0
+zipp>=3.1.0
+joblib>=0.14.0
