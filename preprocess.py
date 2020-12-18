@@ -1,12 +1,32 @@
+'''
+Author: Balaji Betadur
+preprocess.py :
+
+Takes data, unzips it, xtract text from .msg files, process it, formats it and converts it to a csv
+Input: path (zip file)
+Output: csv path
+
+1. unzip file
+2. extract text from ".msg" files
+3. cleans data
+4. formats data
+5. generates csv for a formatted data
+'''
+
+# importing packages
 import zipfile
 import pandas as pd
 import extract_msg
 import re
 import os
 import random
+nltk.download('stopwords')
+from nltk.corpus import stopwords 
 
 
-
+# function to unzip the zipped file
+# input: path of zip file
+# output: unzipped folder path
 def unzip(zip_path):
     archive = zipfile.ZipFile(zip_path, 'r')
     
@@ -15,6 +35,10 @@ def unzip(zip_path):
     for file in archive.namelist():
         archive.extract(file, dest)     
 
+
+# function to clean text includes stopwords removal, stemming, punctuation removal
+# input: raw test
+# output: cleaned text
 def text_to_wordlist(text, remove_stopwords=False, stem_words=False):
         # Clean the text, with the option to remove stopwords and to stem words.
         # Convert words to lower case and split them
@@ -39,6 +63,7 @@ def text_to_wordlist(text, remove_stopwords=False, stem_words=False):
         text = re.sub(r"\.", " ", text)
         text = re.sub(r"!", " ! ", text)
         text = re.sub(r"\/", " ", text)
+
         text = re.sub(r"\^", " ^ ", text)
         text = re.sub(r"\+", " + ", text)
         text = re.sub(r"\-", " - ", text)
@@ -63,15 +88,25 @@ def text_to_wordlist(text, remove_stopwords=False, stem_words=False):
         # Return a list of words
         return(text)
 
+
+# function to extract text from ".msg" files
+# input: path of .msg file
+# output: list of mail subject, mail body, classname and filename
 def extract(path):
     msg = extract_msg.Message(path)
     n = (msg.subject + msg.body).index('Subject:') + 9
     return [text_to_wordlist((msg.subject + msg.body)[n:].replace('\n',' ').replace('\r',' ')) , path.split('/')[-2], path.split('/')[-1]]
     # return [msg.subject,msg.body[n:].replace('\n',' ').replace('\r',' '), path.split('/')[-2]]
 
+
+# function to process training data and generate the CSV file in required format
+# input: filenames and base path
+# output: csv
 def process(base, filenames):
         
     data = []
+
+    # loop to unzip all folders and extract text from all .msg files
     for filename in filenames:
         path = os.getcwd().replace('\\','/') + '/' + base 
         
@@ -79,28 +114,42 @@ def process(base, filenames):
         
         for file in os.listdir(path + '/' + filename[:-4]):
             data.append(extract(path + '/' + filename[:-4] + '/' + file))
+
+    # shuffling data
     random.shuffle(data)        
     df = pd.DataFrame(data, columns = ['Mail','Class','Filename'])
     
+    # adding classname for all files
     for index, row in df.iterrows():
         df.loc[index, 'Target'] = filenames.index(row['Class'] + '.zip')
+
+    # generating csv
     df.to_excel('data_processed.xlsx',index = None)
     return os.getcwd().replace('\\','/') + '/data_processed.xlsx'
     
+# function to process testing data and generate the CSV file in required format
+# input: filenames and base path
+# output: csv
 def process_test(base, filename):
     data = []
     
     path = os.getcwd().replace('\\','/') + '/' + base 
 
+    # unzipp file
     unzip(path + '/' + filename)
 
+    # extract text from .msg file
     for file in os.listdir(path + '/' + filename[:-4]):
         data.append(extract(path + '/' + filename[:-4] + '/' + file))
         
-    random.shuffle(data)        
+    # shufflig data
+    random.shuffle(data)   
+     
     df = pd.DataFrame(data, columns = ['Mail','Target','Filename'])
     df.drop('Target',axis = 1,inplace = True)
     print('Dropping target')
+
+    # generating csv
     df.to_excel('data_processed_test.xlsx',index = None)
     return os.getcwd().replace('\\','/') + '/data_processed_test.xlsx'
 

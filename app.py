@@ -1,3 +1,22 @@
+'''
+Author: Balaji Betadur
+app.py :
+
+Flask app that recieve requests, process requests (traign ad predicting) and returns reponses
+Input: data(training, predicting)
+Output: results (trained model, predicted results)
+
+1. upload data
+2. preprocess data
+3. train model
+4. save model
+5. predict test samples
+6. generate results csv file
+'''
+
+
+
+# import packages
 from flask import Flask,render_template,request,redirect,send_file
 import pandas as pd
 import models
@@ -12,31 +31,29 @@ from numpy import random
 from werkzeug.utils import secure_filename
 import json
 import re
-from bs4 import BeautifulSoup
-from sklearn.metrics import classification_report
-from sklearn.metrics import accuracy_score, confusion_matrix
-from nltk.corpus import stopwords 
 import nltk
 nltk.download('stopwords')
+from nltk.corpus import stopwords 
+import json
+import re
+from bs4 import BeautifulSoup
 
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-# import xgboost as xgb
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.linear_model import SGDClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.pipeline import Pipeline
-from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 
+# create flask app
 app = Flask(__name__)
 
+
+# all parameters including filter params, algorithms, and parameters for all algoritms
 all_params = {
+
+    # time si the filter criteria for algorithms
     "time" : {
         "1": "short time",
         "2": "moderate time"
     },
     
     
+    # all the parameters along with their default values, possible values, and small explanation about the parameter
     "parameters" : {
         "1" : ["Test Size","input","20","Enter test size. ex: 20 for 20% test set"],
         "2" : ["Grid Search","select",["No","Yes"],"Tests for different hyperparameter values (Increases training time)"],
@@ -52,17 +69,19 @@ all_params = {
     },
 
 
+    # models list along with the parameters required
     "models" : {
-
+        
+        # for short time criteria
         "1" : {
             "1" : ["Logistic Regression",["1","2","4"]],
             "2" : ["Decesion Tree Classifier", ["1","2","3"]],
             "3" : ["Random Forest Classifier",["1","2","3","5","6"]],   
-             # "4" : ["XGBoost",["1","2","3","4","6","7"]],   
             "4" : ["Linear Support Vector Machine",["1","2","8","9","10","11"]],   
             "5" : ["Naive Bayes Classifier",["1","2","7"]]
         },
         
+        # for moedrate time criteria
         "2" : {
             "1" : ["Artificial Neural Networks",["7"]],
             "2" : ["LSTM",["7"]],
@@ -72,34 +91,33 @@ all_params = {
 }
 
 
-
+# test folder is where all the test data is saved
 TESTS_FOLDER = os.getcwd() + '\\TESTS'
-UPLOAD_FOLDER = os.getcwd() + '\\Uploads'
-ALLOWED_EXTENSIONS = {'zip'}
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['TESTS_FOLDER'] = TESTS_FOLDER
-f = open ('params.json', "r") 
+
+# uploads folder is where all the train data is saved
+UPLOAD_FOLDER = os.getcwd() + '\\Uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# allowed extensions allow you to see only zip files whie uploading files
+ALLOWED_EXTENSIONS = {'zip'}
 
 
 
+# filenames is a list of all models to make sure the name given for new model is unique
 filenames = os.listdir(os.getcwd().replace('\\','/') + '/Models')
-ff = list(filenames)
-for i in ff:
-    if i.endswith('-cv.pkl') or '.json' in i:
-        filenames.remove(i)
 
 
-
-# Reading from file 
-params = json.loads(f.read()) 
+# Reading training preprocesssed data file 
 dataframe = pd.read_excel('data_processed.xlsx')
 filenames.append("")
 
+# all punctuations to remove
 REPLACE_BY_SPACE_RE = re.compile('[/(){}\[\]\|@,;]')
 BAD_SYMBOLS_RE = re.compile('[^0-9a-z #+_]')
 STOPWORDS = set(stopwords.words('english'))
 
-
+# function to clean text
 def clean_text(text):
                 """
                     text: a string
@@ -113,31 +131,31 @@ def clean_text(text):
                 text = ' '.join(word for word in text.split() if word not in STOPWORDS) # delete stopwors from text
                 return text
 
+
+# home function : first page to load when the website is opened
 @app.route('/',methods=["GET","POST"])
 def home():
 
+    # initilalizing all required parameters 
     filenames = os.listdir(os.getcwd().replace('\\','/') + '/Models')
 
-    ff = list(filenames)
-    for i in ff:
-        if i.endswith('-cv.pkl') or '.json' in i:
-            filenames.remove(i)
-
-    # if request.method=="POST":
-    mo=list(filenames)
+    mo = list(filenames)
     s = '$'.join(filenames)
+
     tabs=[]
-    k='k'
-    js='fjgjfhgjfhgjfhg'
-    l=len(tabs)
-    em=' '
+    k = js = em = ' '
+    l = len(tabs)
     if '' in mo:
         mo.remove('')
+
     for i in range(0,len(mo)):
         mo[i] = mo[i][:-4]
+
     subject = ""
+
     filenames.append('')
     filenames.append(' ')
+
     return render_template('index.html',subject = subject, js=js,em=em,l=l,params = params,mo=mo, s = s, filenames = filenames,k=k,tabs=tabs)
 
 @app.route('/preee',methods=["GET","POST"])
