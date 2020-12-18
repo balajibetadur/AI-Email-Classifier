@@ -233,6 +233,7 @@ def home():
     # initilalizing all required parameters 
     filenames = os.listdir(os.getcwd().replace('\\','/') + '/Models')
 
+
     mo = list(filenames)
     s = '$'.join(filenames)
 

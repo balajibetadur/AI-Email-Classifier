@@ -18,6 +18,7 @@
         "10": ["alpha_svm", "select",["0.001","0.01","0.0001"], "Constant that multiplies the regularization term."],
         "11": ["Maximum Iteration","input","5", "The maximum number of passes over the training data (aka epochs)"]
     },
+    
 
 
     "models" : {
