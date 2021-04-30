@@ -1,3 +1,4 @@
+// Author : Prasanna Kusugal
 // mn.js :
 
 // Validates params and operates webpage dynamically

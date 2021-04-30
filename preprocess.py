@@ -1,17 +1,17 @@
-'''
-Author: Balaji Betadur
-preprocess.py :
-
-Takes data, unzips it, xtract text from .msg files, process it, formats it and converts it to a csv
-Input: path (zip file)
-Output: csv path
-
-1. unzip file
-2. extract text from ".msg" files
-3. cleans data
-4. formats data
-5. generates csv for a formatted data
-'''
+###################################################################################################################################
+#Author: Balaji Betadur
+#preprocess.py :
+#
+#Takes data, unzips it, xtract text from .msg files, process it, formats it and converts it to a csv
+#Input: path (zip file)
+#utput: csv path
+#
+#1. unzip file
+#2. extract text from ".msg" files
+#3. cleans data
+#4. formats data
+#5. generates csv for a formatted data
+###################################################################################################################################
 
 
 # importing packages
@@ -128,6 +128,7 @@ def process(base, filenames):
     # generating csv
     df.to_excel('data_processed.xlsx',index = None)
     return os.getcwd().replace('\\','/') + '/data_processed.xlsx'
+    
     
 # function to process testing data and generate the CSV file in required format
 # input: filenames and base path

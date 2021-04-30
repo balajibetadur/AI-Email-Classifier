@@ -1,16 +1,16 @@
-'''
-Author: Balaji Betadur
-models.py :
-
-Takes the parameters and return the model to the application.
-Input: parameters (dictionary)
-Output: model
-
-1. add new model
-2. add gridsearch parameters
-3. fetch different hyper-parameters
-4. All details about hyperparametsr is given in params.json
-'''
+###################################################################################################################################
+#Author: Balaji Betadur
+#models.py :
+#
+#Takes the parameters and return the model to the application.
+#Input: parameters (dictionary)
+#Output: model
+#
+#1. add new model
+#2. add gridsearch parameters
+#3. fetch different hyper-parameters
+#4. All details about hyperparametsr is given in params.json
+###################################################################################################################################
 
 
 
@@ -35,7 +35,9 @@ from imblearn.pipeline import Pipeline as imbPipeline
 
 # Defining Algorithm functions: Here the models are defined, any new model to the application can be added here.
 
-
+# function to compile logistic regression model
+# input: parameters
+# output: model with hyperparameters given
 def Logistic_Regression(parameters):    
        
 
@@ -75,6 +77,10 @@ def Logistic_Regression(parameters):
 
         return model
 
+
+# function to compile SGD model
+# input: parameters
+# output: model with hyperparameters given
 def SGD_Classifier(parameters):    
        
 
@@ -115,7 +121,11 @@ def SGD_Classifier(parameters):
             model = GridSearchCV(model, params_)
 
         return model
-       
+
+
+# function to compile Naive bayes model
+# input: parameters
+# output: model with hyperparameters given   
 def Multinomnal_NB(parameters):    
        
 
@@ -150,6 +160,10 @@ def Multinomnal_NB(parameters):
 
         return model
 
+
+# function to compile random Forest model
+# input: parameters
+# output: model with hyperparameters given
 def Random_Forest(parameters):    
         
 
@@ -187,6 +201,10 @@ def Random_Forest(parameters):
 
         return model
 
+
+# function to compile Decesion Tree model
+# input: parameters
+# output: model with hyperparameters given
 def Decesion_Tree(parameters):    
         
 

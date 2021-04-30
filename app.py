@@ -1,18 +1,18 @@
-'''
-Author: Balaji Betadur
-app.py :
-
-Flask app that recieve requests, process requests (traign ad predicting) and returns reponses
-Input: data(training, predicting)
-Output: results (trained model, predicted results)
-
-1. upload data
-2. preprocess data
-3. train model
-4. save model
-5. predict test samples
-6. generate results csv file
-'''
+###################################################################################################################################
+#Author: Balaji Betadur and prasanna kusugal
+#app.py :
+#
+#Flask app that recieve requests, process requests (traign ad predicting) and returns reponses
+#Input: data(training, predicting)
+#Output: results (trained model, predicted results)
+#
+#1. upload data
+#2. preprocess data
+#3. train model
+#. save model
+#5. predict test samples
+#6. generate results csv file
+###################################################################################################################################
 
 
 
@@ -117,6 +117,7 @@ REPLACE_BY_SPACE_RE = re.compile("[/(){}\[\]\|@,;]")
 BAD_SYMBOLS_RE = re.compile('[^0-9a-z #+_]')
 STOPWORDS = set(stopwords.words('english'))
 
+
 # function to clean text
 # input: raw text
 # output: cleaned text
@@ -138,77 +139,101 @@ def clean_text(text):
 @app.route('/sub',methods=["GET","POST"])
 def sub():
     if request.method == "POST":
-        json_ = eval(request.form.get('rs'))
-        path = request.files.getlist('fi')
-        t_time = json_['t_ime']
-        data_files = []
-        for i in path:
-            data_files.append(i.filename)
-            i.save(os.path.join(app.config['UPLOAD_FOLDER'],secure_filename(i.filename)))
 
+        # get parameters from front end
+        json_ = eval(request.form.get('rs'))
+        paths = request.files.getlist('fi')
+        t_time = json_['t_ime']
+
+        # list to save all file paths for training data
+        data_files = []
+        for path in paths:
+
+            # adding the path in a list
+            data_files.append(i.filename)
+
+            # saving the path
+            path.save(os.path.join(app.config['UPLOAD_FOLDER'],secure_filename(path.filename)))
+
+        # fethcing the selected algorithm from parameters
         algorithm = all_params['models'][json_['t_ime']][json_['algo']][0]
-        print(json_)
-        print(algorithm)
+
+        # copying the json to a new variable
         params = json_.copy()
 
-
+        # getting the algorithm
         params['algo'] = algorithm
+
+        # getting the paths
         params['files'] = data_files
 
         # split_ratio = round((params['Test Size'] / 100), 2)
         model_name = params['title']
 
+        # calling preprocess function to process training data
         data_path = preprocess.process('Uploads', data_files)
+
+        # reading the processed data
         df = pd.read_excel(data_path)
 
+        # if training time is short
         if t_time == '1':
             
+            # get mail from csv
             df['Mail'] = df['Mail'].apply(clean_text)
 
+            # split training and testing data
             x_train = df.Mail
             y_train = df.Class
             # x_train, X_test, y_train, y_test = train_test_split(X, y, test_size = split_ratio, random_state = 42)
 
-            
+            # if selected algorithm is logistic Regression
             if algorithm == 'Logistic Regression':
+
+                # call logistic regression and save the model in the variable
                 model = models.Logistic_Regression(params)
-                print('trained')
 
 
+            # if selected algorithm is logistic Regression
             elif algorithm == 'Decesion Tree Classifier':
+                
+                # call logistic regression and save the model in the variable
                 model = models.Decesion_Tree(params)
                 
 
+            # if selected algorithm is logistic Regression
             elif algorithm == 'Random Forest Classifier':
+                
+                # call logistic regression and save the model in the variable
                 model = models.Random_Forest(params)
-                print('trained')
                 
 
+            # if selected algorithm is logistic Regression
             elif algorithm == 'Support Vector Machine':
+                
+                # call logistic regression and save the model in the variable
                 model = models.SGD_Classifier(params)
-                print('trained')
                 
 
+            # if selected algorithm is logistic Regression
             elif algorithm == 'Naive Bayes Classifier':
+                
+                # call logistic regression and save the model in the variable
                 model = models.Multinomnal_NB(params)
-                print('trained')
 
+            # training the model
             model.fit(x_train, y_train)
 
+            # saving the model in models folder
             joblib.dump(model, os.getcwd().replace('\\','/') + f'/Models/{model_name}.pkl')
-            print('model saved')
 
-           
+       
+        # if training time is long
         elif t_time == '2': 
 
-            if algorithm == 'Artificial Neural Networks':
-                models.LogisticRegression(params)
-
-            elif algorithm == 'LSTM':
-                models.LogisticRegression(params)
-
-            elif algorithm == 'BERT':
-                models.LogisticRegression(params)
+            # if selected algorithm is logistic Regression
+            # can include deep learning models here
+            pass
 
                 
         
@@ -220,112 +245,12 @@ def sub():
 # Download function: This function downloads results
 @app.route('/download',methods=["GET","POST"])
 def download():
+    # to download the results after prediction
     return send_file('Results.csv',
                      mimetype='text/csv',
                      attachment_filename='Results.csv',
                      as_attachment=True)
 
-
-# home function : first page to load when the website is opened
-@app.route('/',methods=["GET","POST"])
-def home():
-
-    # initilalizing all required parameters 
-    filenames = os.listdir(os.getcwd().replace('\\','/') + '/Models')
-
-
-    mo = list(filenames)
-    s = '$'.join(filenames)
-
-    tabs=[]
-    k = js = em = ' '
-    l = len(tabs)
-    if '' in mo:
-        mo.remove('')
-
-    for i in range(0,len(mo)):
-        mo[i] = mo[i][:-4]
-
-    subject = ""
-
-    filenames.append('')
-    filenames.append(' ')
-
-    return render_template('index.html',subject = subject, js=js,em=em,l=l,params = all_params,mo=mo, s = s, filenames = filenames,k=k,tabs=tabs)
-
-
-# prediction function: This function predicts the testing data
-@app.route('/preee',methods=["GET","POST"])
-def preee():
-    if request.method=="POST":
-
-        filenames = os.listdir(os.getcwd().replace('\\','/') + '/Models')
-        ff = list(filenames)
-        for i in ff:
-            if i.endswith('-cv.pkl') or '.json' in i:
-                filenames.remove(i)
-
-        mo=list(filenames)
-        s = '$'.join(filenames)
-        js = request.form.get('semodel')
-        email= request.form.get('title1')
-        subject= request.form.get('subject')
-        em=email 
-        email2 = email + subject
-
-        is_file = False
-        try:  
-            pat = request.files['fi2']
-            pat.save(os.path.join(app.config['TESTS_FOLDER'],secure_filename( pat.filename)))
-            is_file = True
-        except:
-            pass
-
-        if is_file:
-
-            test_csv = preprocess.process_test('TESTS',pat.filename)
-
-        model_path = os.getcwd().replace('\\','/') + '/Models/' + js + '.pkl'
-     
-        model = joblib.load(model_path)
-
-
-        if is_file:
-            test_data = pd.read_excel(test_csv)
-            # features = cv.fit_transform(test_data.Mail)
-            result = model.predict(test_data.Mail)
-            test_data['Predictions'] = result
-
-            final_output = os.getcwd().replace('\\','/') + '/Results.csv'
-            test_data.to_csv(final_output, index = None)
-            results = test_data.values.tolist()
-            
-        else:
-            # features = cv.fit_transform([email2])
-            result = model.predict([email2])
-            # print(classes)
-            # print(result)
-            results = [[email2 + '...', '',result[0]]]
-            final_output = os.getcwd().replace('\\','/') + '/static/Results.xlsx'
-            pd.DataFrame([[email2, result[0]]], columns = ['Email','Category']).to_csv(final_output, index = None)
-            
-
-
-        tabs = results
-        # results = ''
-        # tabs=[["Dear sir madam i duly completed the required pension application form ...","Retirement"]]
-        l=len(tabs)
-        k = 'OK'
-        if em==None:
-            em=''
-        if '' in mo:
-            mo = mo.remove('')
-        for i in range(0,len(mo)):
-            mo[i] = mo[i][:-4]
-        return render_template('index.html',final_output = final_output, subject = subject,  results = results, k=k,l=l,params = all_params,mo=mo,s = s,em=em,js=js, filenames = filenames,tabs=tabs)
-
-    return redirect("/")
-    # return render_template('index.html',l = 0,)
 
 
 
